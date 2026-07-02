@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { apiFetch } from '../lib/api'
 
 interface BudgetDTO {
   id: number
@@ -22,7 +23,7 @@ const savingExpenseForBudgetId = ref<number | null>(null)
 const expenseErrorMessage = ref('')
 
 async function loadBudgets() {
-  const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/budgets`)
+  const response = await apiFetch('/api/v1/budgets')
   budgets.value = await response.json()
 }
 
@@ -38,9 +39,8 @@ async function addBudget() {
 
   isSavingBudget.value = true
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/budgets`, {
+    const response = await apiFetch('/api/v1/budgets', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         budgetName: newBudgetName.value,
       }),
@@ -73,17 +73,13 @@ async function addExpense(budgetId: number) {
 
   savingExpenseForBudgetId.value = budgetId
   try {
-    const response = await fetch(
-      `${import.meta.env.VITE_API_URL}/api/v1/budgets/${budgetId}/expenses`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          amount: amount,
-          date: date,
-        }),
-      },
-    )
+    const response = await apiFetch(`/api/v1/budgets/${budgetId}/expenses`, {
+      method: 'POST',
+      body: JSON.stringify({
+        amount: amount,
+        date: date,
+      }),
+    })
 
     if (!response.ok) {
       throw new Error(`Server antwortete mit Status ${response.status}`)

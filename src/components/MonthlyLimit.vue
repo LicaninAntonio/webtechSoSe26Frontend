@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
+import { apiFetch } from '../lib/api'
 
 interface MonthlyLimitDTO {
   id: number | null
@@ -24,9 +25,7 @@ const monthLabel = computed(() => {
 })
 
 async function loadMonthlyLimit() {
-  const response = await fetch(
-    `${import.meta.env.VITE_API_URL}/api/v1/monthly-limits/${currentMonth}`,
-  )
+  const response = await apiFetch(`/api/v1/monthly-limits/${currentMonth}`)
   monthlyLimit.value = await response.json()
   limitInput.value = monthlyLimit.value?.limitAmount ?? null
 }
@@ -43,17 +42,13 @@ async function saveLimit() {
 
   isSaving.value = true
   try {
-    const response = await fetch(
-      `${import.meta.env.VITE_API_URL}/api/v1/monthly-limits/${currentMonth}`,
-      {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          month: currentMonth,
-          limitAmount: limitInput.value,
-        }),
-      },
-    )
+    const response = await apiFetch(`/api/v1/monthly-limits/${currentMonth}`, {
+      method: 'PUT',
+      body: JSON.stringify({
+        month: currentMonth,
+        limitAmount: limitInput.value,
+      }),
+    })
 
     if (!response.ok) {
       throw new Error(`Server antwortete mit Status ${response.status}`)
